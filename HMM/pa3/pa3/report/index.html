@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hidden Markov Models and Natural Language Processing</title>
+    <link rel="stylesheet" type="text/css" href="css/app.css">
+</head>
+<body>
+    <header>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <img src="img/bu-logo.gif">
+                <h1>Hidden Markov Models and Natural Language Processing</h1>
+            </div>
+        </div>
+        
+        <div class="project-facts">
+            <div class="row">
+                <div class="columns small-6 medium-5 medium-offset-1 left">
+                    <h3>David Wang</h3>
+                    <p>Team: Cyril Saade, Rebecca Jellinek, Ivan Uvarov</p>
+                </div>
+                <div class="columns small-6 medium-5 left text-right">
+                    <h3>CS440 P3</h3>
+                    <p>April 5, 2016</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+            
+                <div class="contributions">
+                    <h3>My contribution</h3>
+                    <p>Worked on reading from file the .obs and .hmm files, implemented the entirety of statepath.py, and implemented the backwards, gamma, and epsilon functions of optimize.py, as well as outputting to screen the probabilities and creating the sentence-opti.hmm file.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Problem Definition</h2>
+                <p>In this programming assignment, we used Hidden Markov Models to process natural language. We built a program that recognizes sentences and computes the probability of its occurrence. Then, we chose the best state path, and its corresponding tokens for the sequence, for the model based on the highest output probability. Based on these probabilities, and using the Baum-Welch algorithm, we optimized the HMM.</p>
+                <p>The vocabulary supported by the HMM is very limited and does not mirror common English because it cannot recognize articles or preposition. This presents difficulties in the original HMM such as unreasonably low output probabilities. We assume that "SUBJECT AUXILLARY PREDICATE OBJECT" is a "good" English sentence, and each syntactic structure is used to name an individual HMM state.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Methods and Implementation</h2>
+                <h3>General</h3>
+                <p><b>read_hmm_from_file()</b> - reads HMM from a given file and saves values for a given instance of HMM object.</p>
+                <h3>recognizy.py</h3>
+                <p><b>forward()</b> - implements the "forward part" of the forward/backward procedure discussed in class. Given the HMM and observation sequence, it returns the observation probability of that sequence.</p>
+                <h3>statepath.py</h3>
+                <p><b>initModel()</b> - initializes values of HMM by reading it from a given file. It's similar to read_hmm_from_file(), but was implemented by other team members.</p>
+                <p><b>statePath()</b> - implements the Viterbi algorithm to determine the optimal state path for each observation set and reports its probability.</p>
+                <h3>optimize.py</h3>
+                <p><b>forward2()</b> - similat to forward(), but gets only relevant parameters. We use it to compute the probability of the optimized hmm.</p>
+                <p><b>backward()</b> - performs the backward procedure.</p>
+                <p><b>gammaFunc()</b> - computes the gamma variable which is a 2D array.</p>
+                <p><b>epsi()</b> - calculates and returns the new epsilon variable.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Experiments and Results</h2>
+                <h3>Forward Algorithm Question</h3>
+                <p>
+                    Program output:<br>
+                    0.027<br>
+                    0.0288<br>
+                    0.0
+                </p>
+                <p>The first two observation sequences are correct English- "kids play chess" and "robots eat food"- because they follow SUBJECT PREDICATE OBJECT. We expected the probability output to be higher than 2.7% and 2.8%, respectively, given that the observations follow the model. As a result, the HMM must be optimized because it does not always give a reasonable answer.</p>
+                <p>Given the following observation data, the output probability is 0.5% and 0.0%, respectively. Both probabilities should be 0% because they do not follow proper English.</p>
+                <p>
+                    2<br>
+                    4<br>
+                    robots do kids play chess<br>
+                    Output probability: 0.001512<br>
+                    chess eat play kids<br>
+                    Output probability: 0.0
+                </p>
+                <h3>Viterbi Algorithm Question</h3>
+                <p>
+                    Program output:<br>
+                    0.027 SUBJECT PREDICATE OBJECT<br>
+                    0.0288 SUBJECT PREDICATE OBJECT<br>
+                    0.0
+                </p>
+                <p>We can tell from the optimal path of the sentence is semantically correct (i.e. if the words are in the correct order and thus form a grammatically correct sentence).</p>
+                <p>If we run statepath.py with "can kids play chess", we get the following output:</p>
+                <p>0.004725 AUXILIARY SUBJECT PREDICATE OBJECT</p>
+                <p>Therefore, our HMM is also able to recognize sentences that are in form of a question. This result makes sense since the transition probability between "AUXILARY" and "SUBJECT" is not 0, therefore, our HMM is able to detect an auxiliary followed by a subject.</p>
+                <p>However, our HMM can't detect sentences with inflection such as "kids play chess?"" since our HMM does not recognize the question mark.</p>
+                <p>This will either result in either a runtime error, or our HMM will end up detecting a statement instead of a question.</p>
+                <h3>Baum-Welch algorithm Question</h3>
+                <p>If we try to optimize an HMM that has an observation probability equal to zero, the Baum-Welch algorithm would result in a division by zero while computing the gamma and epsilon variables that are used to update the model.</p>
+                <p>Therefore, the Baum-Welch algorithm would result in a runtime error, and would not be applicable with such time of HMM.</p>
+                <h3>Model Enhancement</h3>
+                <p>In order to recognize new syntax structures, we would need to add two additional states to our Hidden Markov Model. We would therefore need to add two states called: "ADVERB" and "PRESENT TENSE"</p>
+                <p>As a consequence:</p>
+                <ol>
+                    <li>We would need to add two rows as well as two columns to our state transition matrix</li>
+                    <li>We would need to add two elements to the initial state distribution vector</li>
+                    <li>We would need to add two rows to our observation matrix</li>
+                </ol>
+                <p>Here is an example of our new HMM:</p>
+                <pre>
+a:
+0.0, 1.0, 0.0, 0.0, 0.0, 0.0 
+1.0, 0.0, 0.0, 0.0, 0.0, 0.0 
+0.0, 0.0, 0.0, 1.0, 0.0, 0.0 
+0.0, 0.0, 0.0, 1.0, 0.0, 0.0
+0.0, 0.0, 0.0, 0.0, 1.0, 0.0
+0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+                </pre>
+                <pre>
+b:
+0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 
+0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0 
+0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0 
+0.1, 0.2, 0.0, 0.0, 0.0, 0.0, 0.3, 0.4
+0.0, 0.3, 0.0, 0.1, 0.4, 0.2, 0.0, 0.0
+0.3, 0.0, 0.3, 0.2, 0.1, 0.0, 0.0, 0.1
+                </pre>
+                <pre>
+pi:
+0.1 0.2 0.1 0.2 0.1 0.3
+                </pre>
+            </div>
+        </div>
+    </section>
+
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Discussion</h2>
+                <p>Our programs implement classes and their methods to read information from files and extract them. We believe this is a strength of our program because it is organized and efficient. The forward algorithm calculates the output probability of each observation sequence. However, since the HMM is limited in its vocabulary, we expected a higher probability than the one given by the algorithm. We found the optimal state path by using the Viterbi algorithm. However, the HMM is flawed because it cannot recognize a sequence that contains AUXILARY followed by SUBJECT, or in other words, a question. We acutely came to the conclusion that including a question mark in these sequences would lead to a runtime error because it cannot recognize symbols. Additionally, we are aware the limitations of the Baum-Welch algorithm in terms of the runtime error due to the possibility of dividing by an observation probability of zero.</p> 
+                <p>Our methods are successful in providing the correct probabilities for the sequences. Although we expected a higher probability for sequences that followed the rules of English syntax, we are aware the correct probabilities given in the assignment sheet, and our probabilities match those given. Our results confirmed the limitations of the HMM. We were able to enhance the HMM by adding two additional states (ADVERB and PRESENT TENSE) to the model. In the future, we would clean up the methods needed to read from files.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <section>
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Conclusion</h2>
+                <p>The purpose of this assignment was to explore the implementation that goes behind speech recognition.</p>
+                <p>Our task was to implement a Hidden Markov model that recognizes the correctness of an inputted sentence based on a limited alphabet. Additionally, our HMM is able to identify the various components of a sentence (the auxiliary, the subject, the predicate, as well as the object). Finally, our HMM is able to train itself based on a given observation sequence. This feature is key in artificial intelligence since the accuracy of the outputted probability would increase over the number of usage.</p> 
+                <p>In order to improve our HMM, we could increase our alphabet so that it could recognize more words, as well as add a couple additional states in order to differentiate questions between statements.</p>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <section class="last">
+        <div class="row">
+            <div class="columns small-12 medium-10 small-centered">
+                <h2>Credits and Bibliography</h2>
+                <p>C. Vogler and D. Metaxas, "ASL Recognition Based on a Coupling Between HMMs and 3D Motion Analysis," Proceedings of the International Conference on Computer Vision, pp. 363-369, Mumbai, India, 1998. pdf.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
